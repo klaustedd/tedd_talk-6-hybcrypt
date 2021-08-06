@@ -42,12 +42,13 @@
           </v-textarea>
         </v-col>
     </v-row>
+    {{secureTransport}}
   </v-container>
 </template>
 
 <script>
 import SecurityService from "../services/SecurityService";
-import MessageService from "../services/MessageService";
+//import MessageService from "../services/MessageService";
 import crypto from "crypto";
 
   export default {
@@ -72,6 +73,24 @@ import crypto from "crypto";
 
       criptografarMensagem() {
 
+        this.error = false;
+        this.encryptedText = ""; //<- guarda o valor criptografado do texto
+
+        // const encryptedData = crypto.publicEncrypt(this.publicKey, Buffer.from(this.text, "utf-8"));
+        // this.encryptedText = encryptedData.toString("base64");
+        const randomPrivateKey = crypto.randomBytes(32);
+        const randomIV = crypto.randomBytes(16);
+        const cipher = crypto.createCipheriv('aes-256-cbc', randomPrivateKey, randomIV);
+
+        //Realizando criptografia AES
+        const dataToEncrypt = Buffer.from(this.text, "utf-8");
+        const encryptedData = Buffer.concat([cipher.update(dataToEncrypt), cipher.final()]);
+        this.encryptedText = encryptedData.toString("base64");
+
+        //Criptografando a chave gerada no cliente com criptografia RSA para ser decifrada pelo servidor
+        this.secureTransport.key = crypto.publicEncrypt(this.publicKey, randomPrivateKey).toString("base64");
+        this.secureTransport.iv = crypto.publicEncrypt(this.publicKey, randomIV).toString("base64");
+        this.secureTransport.data = this.encryptedText;
       },
 
       enviarMensagem() {
