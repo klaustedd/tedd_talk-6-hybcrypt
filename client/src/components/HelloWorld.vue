@@ -48,7 +48,8 @@
 
 <script>
 import SecurityService from "../services/SecurityService";
-//import MessageService from "../services/MessageService";
+import MessageService from "../services/MessageService";
+
 import crypto from "crypto";
 
   export default {
@@ -91,10 +92,11 @@ import crypto from "crypto";
         this.secureTransport.key = crypto.publicEncrypt(this.publicKey, randomPrivateKey).toString("base64");
         this.secureTransport.iv = crypto.publicEncrypt(this.publicKey, randomIV).toString("base64");
         this.secureTransport.data = this.encryptedText;
+
       },
 
       enviarMensagem() {
-
+        MessageService.enviarMensagem(this.secureTransport);
       }
 
     },
@@ -111,7 +113,6 @@ import crypto from "crypto";
         secureTransport : {
           iv : String,
           key : String,
-          alg : String,
           data : String
         }
     }),
